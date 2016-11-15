@@ -16,24 +16,27 @@
             @Html.TextBoxFor(m => m.Email, new { @class = "form-control", placeholder = "Email" })
         </div>
     </div>
-    <div class="form-group">
-        <div class="col-md-10">
-            @Html.TextBoxFor(m => m.Username, new { @class = "form-control", placeholder = "Username" })
+
+    <div ng-controller="RegisterCtrl">
+        <div class="form-group">
+            <div class="col-md-10" ng-model="username">
+                @Html.TextBoxFor(m => m.Username, new { @class = "form-control", placeholder = "Username" } )
+            </div>
         </div>
-    </div>
-    <div class="form-group">
-        <div class="col-md-10">
-            @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "Password" })
+        <div class="form-group">
+            <div class="col-md-10">
+                @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "Password" })
+            </div>
         </div>
-    </div>
-    <div class="form-group">
-        <div class="col-md-10">
-            @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control", placeholder = "Confirm Password" })
+        <div class="form-group">
+            <div class="col-md-10">
+                @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control", placeholder = "Confirm Password" })
+            </div>
         </div>
-    </div>
-    <div class="form-group">
-        <div class="col-md-offset-2 col-md-10">
-            <input type="submit" class="btn btn-default" value="Register" />
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" class="btn btn-default" value="Register" />
+            </div>
         </div>
     </div>
 }
