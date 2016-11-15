@@ -25,12 +25,12 @@ namespace Tweeter.DAL
 
         public List<string> GetUsernames()
         {
-            return Context.Users.Select(u => u.UserName).ToList();
+            return Context.TweeterUsers.Select(u => u.BaseUser.UserName).ToList();
         }
 
-        public ApplicationUser GetUsernames(string username)
+        public Twit UsernameExists(string username)
         {
-            return Context.Users.FirstOrDefault(u => u.UserName.ToLower() == username.ToLower());
+            return Context.TweeterUsers.FirstOrDefault(u => u.BaseUser.UserName.ToLower() == username.ToLower());
         }
     }
 }

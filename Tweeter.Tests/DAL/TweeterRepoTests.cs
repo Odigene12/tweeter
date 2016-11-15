@@ -14,25 +14,34 @@ namespace Tweeter.Tests.DAL
     public class TweeterRepoTests
     {
 
-        private Mock<DbSet<ApplicationUser>> mock_users { get; set; }
+        private Mock<DbSet<Twit>> mock_users { get; set; }
 
         private Mock<TweeterContext> mock_context { get; set; }
-        private Mock<UserManager<ApplicationUser>> mock_usermanager_context { get; set; }
         private TweeterRepository Repo { get; set; }
-
-        List<ApplicationUser> users = new List<ApplicationUser>()
-            {
-                new ApplicationUser {UserName = "Batman" }
-            };
-
+        
+        private List<Twit> users { get; set; }
 
 [TestInitialize]
         public void Initialize()
         {
-            mock_usermanager_context = new Mock<UserManager<ApplicationUser>>();
             mock_context = new Mock<TweeterContext>();
-            mock_users = new Mock<DbSet<ApplicationUser>>();
+            mock_users = new Mock<DbSet<Twit>>();
             Repo = new TweeterRepository(mock_context.Object);
+
+            users = new List<Twit>()
+                {
+                    new Twit
+                    {
+                        TwitId = 0,
+                        BaseUser = new ApplicationUser() { UserName = "Superman" }
+                    },
+                   new Twit
+                     {
+                        TwitId = 1,
+                        BaseUser = new ApplicationUser() { UserName = "Batman" }
+                    },
+                };
+
             ConnectToDatastore();
             /* 
              1. Install Identity into Tweeter.Tests (using statement needed)
@@ -44,15 +53,15 @@ namespace Tweeter.Tests.DAL
         {
             var query_users = users.AsQueryable();
 
-            mock_users.As<IQueryable<ApplicationUser>>().Setup(m => m.Provider).Returns(query_users.Provider);
-            mock_users.As<IQueryable<ApplicationUser>>().Setup(m => m.Expression).Returns(query_users.Expression);
-            mock_users.As<IQueryable<ApplicationUser>>().Setup(m => m.ElementType).Returns(query_users.ElementType);
-            mock_users.As<IQueryable<ApplicationUser>>().Setup(m => m.GetEnumerator()).Returns(() => query_users.GetEnumerator());
+            mock_users.As<IQueryable<Twit>>().Setup(m => m.Provider).Returns(query_users.Provider);
+            mock_users.As< IQueryable<Twit>> ().Setup(m => m.Expression).Returns(query_users.Expression);
+            mock_users.As<IQueryable<Twit>>().Setup(m => m.ElementType).Returns(query_users.ElementType);
+            mock_users.As<IQueryable<Twit>>().Setup(m => m.GetEnumerator()).Returns(() => query_users.GetEnumerator());
 
 
-            mock_context.Setup(c => c.Users).Returns(mock_users.Object);
+            mock_context.Setup(c => c.TweeterUsers).Returns(mock_users.Object);
 
-            mock_users.Setup(t => t.Add(It.IsAny<ApplicationUser>())).Callback((ApplicationUser person) =>users.Add(person));
+            mock_users.Setup(t => t.Add(It.IsAny<Twit>())).Callback((Twit person) =>users.Add(person));
             /*
              * Below mocks the 'Users' getter that returns a list of ApplicationUsers
              * mock_user_manager_context.Setup(c => c.Users).Returns(mock_users.Object);
@@ -78,7 +87,7 @@ namespace Tweeter.Tests.DAL
 
             var allUsernames = repo.GetUsernames();
 
-            Assert.AreEqual(allUsernames.Count, 1);
+            Assert.AreEqual(allUsernames.Count, 2);
         }
 
         [TestMethod]
@@ -86,11 +95,8 @@ namespace Tweeter.Tests.DAL
         {
             var repo = new TweeterRepository(mock_context.Object);
 
-            var newUser = new ApplicationUser() { UserName = "Superman" };
 
-            users.Add(newUser);
-
-            var foundUser = repo.GetUsernames("Superman");
+            var foundUser = repo.UsernameExists("Superman");
 
             Assert.IsTrue(users.Contains(foundUser));
         }
