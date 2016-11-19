@@ -45,3 +45,17 @@ $("#register-username").focusin(function () {
     $("#username-ans").removeClass("glyphicon-remove");
 });
 */
+
+/*Call to controller to get tweets*/
+
+var getTweets = function () {
+    $.ajax({
+        url: "/api/Tweet",
+        method: 'GET'
+    }).success(function (response) {
+        console.log(response);
+    }).fail(function (error) {
+        console.log(error);
+    });
+}()
+

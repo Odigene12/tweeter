@@ -6,6 +6,7 @@ using System.Data.Entity;
 using Tweeter.Models;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNet.Identity;
 
 namespace Tweeter.Tests.DAL
 {
@@ -17,8 +18,12 @@ namespace Tweeter.Tests.DAL
 
         private Mock<DbSet<Tweet>> mock_tweets { get; set; }
         private Mock<TweeterContext> mock_context { get; set; }
+
+        private Mock<UserManager<ApplicationUser>> mock_usermanager_context { get; set; }
+        private Mock<DbSet<ApplicationUser>> mock_app_user {get; set;}
         private TweeterRepository Repo { get; set; }
         private List<Twit> users { get; set; }
+        private List<ApplicationUser> appUsers { get; set; }
 
         private List<Tweet> tweets { get; set; }
 
@@ -28,6 +33,8 @@ namespace Tweeter.Tests.DAL
             mock_context = new Mock<TweeterContext>();
             mock_users = new Mock<DbSet<Twit>>();
             mock_tweets = new Mock<DbSet<Tweet>>();
+            mock_usermanager_context = new Mock<UserManager<ApplicationUser>>();
+            mock_app_user = new Mock<DbSet<ApplicationUser>>();
             Repo = new TweeterRepository(mock_context.Object);
             users = new List<Twit>
             {
@@ -47,6 +54,13 @@ namespace Tweeter.Tests.DAL
                 new Tweet { Message = "WHAT's Good!!!", TweetId = 1},
 
                 new Tweet { Message = "WHAT's REALLY Good!!!", TweetId = 2 }
+            };
+
+            appUsers = new List<ApplicationUser>()
+            {
+                new ApplicationUser {UserName = "Superman" },
+
+                new ApplicationUser {UserName = "Batman" }
             };
 
             /* 
@@ -89,6 +103,18 @@ namespace Tweeter.Tests.DAL
             /* IF we just add a Username field to the Twit model
              * mock_context.Setup(c => c.TweeterUsers).Returns(mock_users.Object); Assuming mock_users is List<Twit>
              */
+
+            var query_app_users = appUsers.AsQueryable();
+
+            mock_app_user.As<IQueryable<ApplicationUser>>().Setup(m => m.Provider).Returns(query_app_users.Provider);
+            mock_app_user.As<IQueryable<ApplicationUser>>().Setup(m => m.Expression).Returns(query_app_users.Expression);
+            mock_app_user.As<IQueryable<ApplicationUser>>().Setup(m => m.ElementType).Returns(query_app_users.ElementType);
+            mock_app_user.As<IQueryable<ApplicationUser>>().Setup(m => m.GetEnumerator()).Returns(() => query_app_users.GetEnumerator());
+
+
+            mock_usermanager_context.Setup(c => c.Users).Returns(mock_app_user.Object);
+
+         
         }
 
         [TestMethod]
@@ -183,6 +209,20 @@ namespace Tweeter.Tests.DAL
             //Assert
             Assert.AreEqual(myTweets.Count, 2);
 
+        }
+
+        [TestMethod]
+        public void CanIGetTwitUser()
+        {
+            // Arrange
+            TweeterRepository repo = new TweeterRepository(mock_context.Object);
+            ConnectToDatastore();
+
+            Twit foundTwit = repo.GetTwitUser("sallym");
+
+            var compared_twit = users.Select(u => u.BaseUser.UserName = "sallym");
+
+            Assert.AreEqual(compared_twit, foundTwit.BaseUser.UserName);
         }
     }
 }
